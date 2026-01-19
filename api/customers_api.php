@@ -10,6 +10,7 @@ $action = $_GET['action'] ?? '';
 
 // --- إضافة عميل جديد ---
 if ($action == 'add') {
+    
     $branch_id    = $data['branch_id'] ?? null;
     $first_name   = $data['first_name'] ?? null;
     $last_name    = $data['last_name'] ?? null;
