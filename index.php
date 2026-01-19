@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 // 1. إعدادات الوصول (CORS) واستجابة JSON
 header("Access-Control-Allow-Origin: *");
@@ -112,3 +113,6 @@ switch ($module) {
         echo json_encode(["message" => "الموديول أو الأكشن غير موجود"]);
         break;
 }
+=======
+header("location: api/");
+>>>>>>> 7a8dfef0717481d879ca2de28acc64de62e514e7
