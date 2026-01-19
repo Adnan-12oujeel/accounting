@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 15, 2026 at 07:00 PM
+-- Generation Time: Jan 19, 2026 at 10:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -64,7 +64,8 @@ CREATE TABLE `branches` (
 INSERT INTO `branches` (`id`, `name`, `location`, `address`, `mobile`, `email`, `is_active`, `date_of_start`, `plan`, `created_at`, `password`) VALUES
 (1, 'فرع دبي الرئيسي', NULL, 'برج خليفة، الطابق 10، دبي', '+971501234567', 'dubai_branch@accounting.com', 1, '2026-01-15', '2_years', '2026-01-15 15:20:22', NULL),
 (3, 'فرع دبيي', NULL, 'برج خليفة10، دبي', '+971501234567', 'dubai_brh@accounting.com', 1, '2026-01-15', '2_years', '2026-01-15 15:22:46', NULL),
-(4, 'المركز الرئيسي', 'الإدارة العامة', NULL, NULL, NULL, 1, NULL, 'yearly', '2026-01-15 17:58:15', NULL);
+(4, 'المركز الرئيسي', 'الإدارة العامة', NULL, NULL, NULL, 1, NULL, 'yearly', '2026-01-15 17:58:15', NULL),
+(5, 'المركز الرئيسي', 'الإدارة العامة', NULL, NULL, NULL, 1, NULL, 'yearly', '2026-01-15 18:32:24', NULL);
 
 -- --------------------------------------------------------
 
@@ -145,6 +146,7 @@ CREATE TABLE `invoices` (
   `total_amount` decimal(15,2) DEFAULT 0.00,
   `discount` decimal(15,2) DEFAULT 0.00,
   `net_amount` decimal(15,2) DEFAULT 0.00,
+  `net_profit` decimal(15,2) DEFAULT 0.00,
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -199,6 +201,7 @@ CREATE TABLE `invoice_sales_returns` (
   `return_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `condition_of_goods` text DEFAULT NULL,
   `total_value_of_returns` decimal(15,2) DEFAULT 0.00,
+  `refund_method` enum('cash','installment_deduction') NOT NULL,
   `invoice_creator` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -216,6 +219,21 @@ CREATE TABLE `notifications` (
   `notification_type` varchar(50) DEFAULT 'email',
   `status` enum('sent','failed','pending') DEFAULT 'pending',
   `sent_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `price_approvals`
+--
+
+CREATE TABLE `price_approvals` (
+  `id` int(11) NOT NULL,
+  `invoice_id` int(11) DEFAULT NULL,
+  `admin_id` int(11) DEFAULT NULL,
+  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `admin_notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -252,6 +270,28 @@ INSERT INTO `products` (`id`, `branch_id`, `category_id`, `unit_id`, `name`, `pr
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `project_features`
+--
+
+CREATE TABLE `project_features` (
+  `id` int(11) NOT NULL,
+  `feature_key` varchar(50) NOT NULL,
+  `feature_name` varchar(100) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `project_features`
+--
+
+INSERT INTO `project_features` (`id`, `feature_key`, `feature_name`, `is_active`) VALUES
+(1, 'inventory_module', 'نظام المخازن', 1),
+(2, 'hr_module', 'الموارد البشرية', 0),
+(3, 'advanced_reports', 'التقارير المتقدمة', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `units`
 --
 
@@ -281,7 +321,7 @@ CREATE TABLE `users` (
   `branch_id` int(11) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `user_permissions` text DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `last_login` datetime DEFAULT NULL,
@@ -293,8 +333,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `branch_id`, `name`, `email`, `password`, `user_permissions`, `is_active`, `last_login`, `created_at`) VALUES
-(1, 1, 'محاسب المبيعات', 'super_admin_new@example.com', '$2y$10$/4yJ5zd.A54t8JScqiVldOQyk4Lu0LVka.FIg3WcujfB9CqZWeM8m', '[\"invoices_view\",\"invoices_add\",\"customers_view\"]', 1, NULL, '2026-01-15 15:40:51'),
-(2, 1, 'مدير النظام', 'admin@system.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '[\"all_access\"]', 1, NULL, '2026-01-15 17:58:15');
+(5, 1, 'مدير النظام', 'admin@system.com', '$2y$10$pLpI7LqC5E2/gW8v/Y0KBe0yG.pQ9WkL1rUuX5S.I2h1pX6vF6wG.', '[\"all_access\"]', 1, NULL, '2026-01-15 19:01:03');
 
 --
 -- Indexes for dumped tables
@@ -378,6 +417,13 @@ ALTER TABLE `notifications`
   ADD KEY `invoice_id` (`invoice_id`);
 
 --
+-- Indexes for table `price_approvals`
+--
+ALTER TABLE `price_approvals`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_approval_invoice` (`invoice_id`);
+
+--
 -- Indexes for table `products`
 --
 ALTER TABLE `products`
@@ -385,6 +431,13 @@ ALTER TABLE `products`
   ADD KEY `branch_id` (`branch_id`),
   ADD KEY `category_id` (`category_id`),
   ADD KEY `unit_id` (`unit_id`);
+
+--
+-- Indexes for table `project_features`
+--
+ALTER TABLE `project_features`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `feature_key` (`feature_key`);
 
 --
 -- Indexes for table `units`
@@ -414,7 +467,7 @@ ALTER TABLE `actions`
 -- AUTO_INCREMENT for table `branches`
 --
 ALTER TABLE `branches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -465,10 +518,22 @@ ALTER TABLE `notifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `price_approvals`
+--
+ALTER TABLE `price_approvals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `project_features`
+--
+ALTER TABLE `project_features`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `units`
@@ -480,7 +545,7 @@ ALTER TABLE `units`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -546,6 +611,12 @@ ALTER TABLE `notifications`
   ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`),
   ADD CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `notifications_ibfk_3` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`);
+
+--
+-- Constraints for table `price_approvals`
+--
+ALTER TABLE `price_approvals`
+  ADD CONSTRAINT `fk_approval_invoice` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `products`
