@@ -20,5 +20,5 @@ jobs:
           password: ${{ secrets.FTP_PASS }}
           port: ${{ secrets.FTP_PORT }}
           local-dir: ./
-          server-dir: /public_html/acc-adn/
+          server-dir: /domains/acc-adn.devmmnd.com/public_html/
            
