@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 // 1. إعدادات الوصول (CORS) واستجابة JSON
 header("Access-Control-Allow-Origin: *");
