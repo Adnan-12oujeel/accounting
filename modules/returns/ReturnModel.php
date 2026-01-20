@@ -6,7 +6,19 @@ class ReturnModel {
         $this->conn = $db;
     }
 
-    // إنشاء فاتورة مرتجع مع بنودها
+    // دالة لجلب خصم المنتج من الفاتورة الأساسية
+    private function getItemDiscountFromOriginal($invoice_id, $product_id) {
+        $query = "SELECT discount, unit_price FROM invoice_items 
+                  WHERE invoice_id = :invoice_id AND product_id = :product_id 
+                  LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            ":invoice_id" => $invoice_id,
+            ":product_id" => $product_id
+        ]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function createReturn($return_data, $items) {
         try {
             $this->conn->beginTransaction();
@@ -28,8 +40,17 @@ class ReturnModel {
             
             $return_id = $this->conn->lastInsertId();
 
-            // 2. إدخال بنود المرتجع
+            // 2. إدخال بنود المرتجع مع جلب الخصم الأصلي
             foreach ($items as $item) {
+                // جلب الخصم الأصلي للمنتج من الفاتورة الأساسية
+                $originalData = $this->getItemDiscountFromOriginal($return_data['main_invoice_id'], $item['product_id']);
+                $originalDiscount = $originalData ? $originalData['discount'] : 0;
+                $originalPrice = $originalData ? $originalData['unit_price'] : $item['unit_price'];
+
+                // حساب الصافي للمرتجع بناءً على الخصم الأصلي
+                $itemTotal = $item['count'] * $originalPrice;
+                $netAmount = $itemTotal - ($originalDiscount * $item['count']);
+
                 $item_query = "INSERT INTO invoice_return_items 
                                SET return_invoice_id=:ret_id, product_id=:prod_id, 
                                    unit=:unit, count=:count, unit_price=:price, 
@@ -41,9 +62,9 @@ class ReturnModel {
                     ":prod_id" => $item['product_id'],
                     ":unit" => $item['unit'],
                     ":count" => $item['count'],
-                    ":price" => $item['unit_price'],
-                    ":total" => $item['total'],
-                    ":net" => $item['net_amount']
+                    ":price" => $originalPrice,
+                    ":total" => $itemTotal,
+                    ":net" => $netAmount
                 ]);
             }
 
