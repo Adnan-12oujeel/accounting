@@ -50,9 +50,9 @@ CREATE TABLE IF NOT EXISTS `branches` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table accounting.branches: ~0 rows (approximately)
-INSERT INTO `branches` (`id`, `name`, `address`, `mobile`, `email`, `is_active`, `date_of_start`, `plan`) VALUES
-	(1, 'الإدارة العامة', 'المركز الرئيسي', NULL, NULL, 1, NULL, 'annual');
+-- Dumping data for table accounting.branches: ~1 rows (approximately)
+INSERT INTO `branches` (`id`, `name`, `address`, `mobile`, `email`, `is_active`, `date_of_start`, `plan`, `active`) VALUES
+	(1, 'الإدارة العامة', 'المركز الرئيسي', NULL, NULL, 1, NULL, 'annual', 1);
 
 -- Dumping structure for table accounting.categories
 CREATE TABLE IF NOT EXISTS `categories` (
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table accounting.categories: ~0 rows (approximately)
+-- Dumping data for table accounting.categories: ~4 rows (approximately)
 INSERT INTO `categories` (`id`, `branch_id`, `name`, `country_of_origin`, `is_active`) VALUES
 	(1, 1, 'Test Category 902', NULL, 1),
 	(2, 1, 'لباسل', NULL, 1),
@@ -86,10 +86,10 @@ CREATE TABLE IF NOT EXISTS `customers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table accounting.customers: ~0 rows (approximately)
-INSERT INTO `customers` (`id`, `customer_type`, `name`, `company`, `phone`, `address`, `balance`, `created_at`) VALUES
-	(1, 'Cash', 'عميل نقدي عام', NULL, '0000000000', NULL, 0.00, '2026-01-21 14:38:37'),
-	(2, 'Cash', 'رباي', 'لبءالبسيب', '23453254325', 'تابيس ', 0.00, '2026-01-21 15:10:15');
+-- Dumping data for table accounting.customers: ~2 rows (approximately)
+INSERT INTO `customers` (`id`, `branch_id`, `customer_type`, `name`, `company`, `phone`, `address`, `balance`, `created_at`, `active`) VALUES
+	(1, 1, 'Cash', 'عميل نقدي عام', NULL, '0000000000', NULL, 0.00, '2026-01-21 14:38:37', 1),
+	(2, 1, 'Cash', 'رباي', 'لبءالبسيب', '23453254325', 'تابيس ', 0.00, '2026-01-21 15:10:15', 1);
 
 -- Dumping structure for table accounting.installments
 CREATE TABLE IF NOT EXISTS `installments` (
@@ -132,9 +132,9 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   CONSTRAINT `invoices_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table accounting.invoices: ~0 rows (approximately)
-INSERT INTO `invoices` (`id`, `kind`, `branch_id`, `customer_name`, `total_amount`, `customer_id`, `supplier_id`, `invoice_type`, `payment_method_id`, `date`, `payment_method`, `invoice_status`, `total`, `discount`, `final_amount`, `net_amount`, `notes`) VALUES
-	(1, 'sales', 1, 'عميل نقدي', 123.00, 1, NULL, 'sales_invoice', 1, '2026-01-21 15:02:09', NULL, 'Paid', 0.00, 0.00, 0.00, 112.00, '');
+-- Dumping data for table accounting.invoices: ~1 rows (approximately)
+INSERT INTO `invoices` (`id`, `kind`, `branch_id`, `customer_name`, `total_amount`, `customer_id`, `origin_invoice_id`, `supplier_id`, `invoice_type`, `payment_method_id`, `date`, `payment_method`, `invoice_status`, `total`, `discount`, `final_amount`, `net_amount`, `paid_amount`, `notes`, `creator_id`) VALUES
+	(1, 'sales', 1, 'عميل نقدي', 123.00, 1, NULL, NULL, 'sales_invoice', 1, '2026-01-21 15:02:09', NULL, 'Paid', 0.00, 0.00, 0.00, 112.00, 0.00, '', NULL);
 
 -- Dumping structure for table accounting.invoice_items
 CREATE TABLE IF NOT EXISTS `invoice_items` (
@@ -225,9 +225,9 @@ CREATE TABLE IF NOT EXISTS `products` (
   CONSTRAINT `products_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table accounting.products: ~0 rows (approximately)
-INSERT INTO `products` (`id`, `branch_id`, `category_id`, `name`, `description`, `price`, `cost`, `stock_quantity`, `alert_quantity`, `weight`, `selling_price`, `default_unit`, `productive_capital`, `is_active`, `product_code`, `container_code`, `received_date`, `product_place`, `notes`, `created_at`) VALUES
-	(1, 1, 1, 'dsgfws', 'fghasfsdagb', 123.00, 12.00, 1212, 5, NULL, NULL, NULL, NULL, 1, 'code-123', NULL, NULL, NULL, NULL, '2026-01-21 14:21:27');
+-- Dumping data for table accounting.products: ~1 rows (approximately)
+INSERT INTO `products` (`id`, `branch_id`, `category_id`, `name`, `description`, `price`, `cost`, `stock_quantity`, `alert_quantity`, `weight`, `selling_price`, `default_unit`, `productive_capital`, `is_active`, `product_code`, `container_code`, `received_date`, `product_place`, `stock_qty`, `notes`, `created_at`, `active`) VALUES
+	(1, 1, 1, 'dsgfws', 'fghasfsdagb', 123.00, 12.00, 1212, 5, NULL, NULL, NULL, NULL, 1, 'code-123', NULL, NULL, NULL, 0.00, NULL, '2026-01-21 14:21:27', 1);
 
 -- Dumping structure for table accounting.system_settings
 CREATE TABLE IF NOT EXISTS `system_settings` (
@@ -260,9 +260,10 @@ CREATE TABLE IF NOT EXISTS `users` (
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table accounting.users: ~0 rows (approximately)
-INSERT INTO `users` (`id`, `branch_id`, `name`, `email`, `password`, `user_permissions`, `is_active`, `last_login`, `created_at`) VALUES
-	(2, 1, 'Super Admin', 'super@system.com', '$2y$10$U0ZRmOdWH2yO7qj2ppoDC.GXWBkWF4/GufozFtZrrjK8sEOLXo/SS', '{"role": "super_admin", "all_access": true, "can_manage_admins": true, "can_create_branches": true}', 1, NULL, '2026-01-21 13:39:09');
+-- Dumping data for table accounting.users: ~1 rows (approximately)
+INSERT INTO `users` (`id`, `branch_id`, `name`, `email`, `password`, `user_permissions`, `is_active`, `last_login`, `created_at`, `active`) VALUES
+	(2, 1, 'Super Admin', 'super@system.com', '$2y$10$U0ZRmOdWH2yO7qj2ppoDC.GXWBkWF4/GufozFtZrrjK8sEOLXo/SS', '{"role": "super_admin", "all_access": true, "can_manage_admins": true, "can_create_branches": true}', 1, NULL, '2026-01-21 13:39:09', 1),
+	(5, 1, 'المدير العام', 'admin@system.com', '$2y$10$9ABJ98m/Nl7K8Y5bmD3wyeF84Z68.NqrVxJ7hwtntjQvNBZYdFEXG', '["all_access"]', 1, '2026-01-21 21:08:51', '2026-01-21 18:02:41', 1);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
